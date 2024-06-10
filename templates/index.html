@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Security System</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #log-container {
+            flex: 1;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border-right: 1px solid #ccc;
+        }
+        #log {
+            height: 80vh;
+            overflow-y: scroll;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        #video-container {
+            flex: 3;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        img {
+            width: 50vw;
+            height: 30vw;
+        }
+        #controls {
+            margin-top: 20px;
+        }
+        #video-selection {
+            flex: 1;
+            padding: 20px;
+            background-color: #f1f1f1;
+            border-left: 1px solid #ccc;
+        }
+        #count-info {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="log-container">
+        <h2>Detection Log</h2>
+        <div id="count-info">
+            <p>Walking In: <span id="walk-in-count">0</span></p>
+            <p>Walking Out: <span id="walk-out-count">0</span></p>
+        </div>
+        <div id="log">
+        </div>
+    </div>
+    <div id="video-container">
+        <h1>Security System</h1>
+        <img id="video" src="{{ url_for('video_feed', source='video/test1.mp4') }}" alt="Video Feed">
+        <div id="controls">
+            <button onclick="controlVideo('backward')">Backward 10s</button>
+            <button onclick="controlVideo('forward')">Forward 10s</button>
+            <button onclick="sendControl('pause')">Pause</button>
+            <button onclick="sendControl('play')">Play</button>
+            <button onclick="sendControl('slow')">Slow Down</button>
+            <button onclick="sendControl('fast')">Speed Up</button>
+        </div>
+    </div>
+    <div id="video-selection">
+        <h2>Select a Video</h2>
+        <ul>
+            {% for video in videos %}
+                <li><button onclick="selectVideo('{{ video }}')">{{ video }}</button></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <script>
+        function selectVideo(video) {
+            document.getElementById('video').src = `{{ url_for('video_feed') }}?source=${video}`;
+            addLogEntry(`Selected video: ${video}`);
+        }
+
+        function controlVideo(action) {
+            fetch('/control', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: action }),
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      addLogEntry(`${action} 10 seconds`);
+                  }
+              }).catch(err => console.error("Error controlling video:", err));
+        }
+
+        function sendControl(action) {
+            fetch('/control', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: action }),
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      console.log('Control action successful:', action);
+                  }
+              }).catch(err => console.error("Error sending control action:", err));
+        }
+
+        function addLogEntry(entry) {
+            const logContainer = document.getElementById('log');
+            const logEntry = document.createElement('div');
+            logEntry.textContent = entry;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function updateCounts() {
+            fetch('/count_info')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('walk-in-count').textContent = data.walk_in_count;
+                    document.getElementById('walk-out-count').textContent = data.walk_out_count;
+                })
+                .catch(err => console.error("Error fetching count info:", err));
+        }
+
+        setInterval(updateCounts, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    max-width: 1200px;
+}
+
+.sidebar {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.main-content {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.controls {
+    flex: 1;
+    margin-left: 20px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+#video {
+    width: 100%;
+    height: auto;
+}
+
+button {
+    display: block;
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#log {
+    list-style: none;
+    padding: 0;
+}
